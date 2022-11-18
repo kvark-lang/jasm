@@ -9,9 +9,9 @@ Deno.test({
       withFormat: "elf",
     });
     t.step({
-      name: "mov eax, 1",
+      name: "mov eax, 2",
       fn: () => {
-        assertEquals(mov("eax", 1));
+        assertEquals(mov("eax", 2));
       },
     });
   },
