@@ -80,8 +80,14 @@ instructions.forEach((instruction) => {
         }
         return i.mnem.toLowerCase() === mnem && correctDst && correctSrc;
       });
-
-      throw "no correct combination of types found";
+      const variant = variants[0];
+      if (!variant) {
+        throw `no correct combination of types found for - ${mnem} ${
+          data.join(" ")
+        }`;
+      }
+      console.log(variant);
+      return [0];
     };
   }
 });
