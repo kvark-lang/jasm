@@ -1,0 +1,21 @@
+{
+  "scriptId": "3",
+  "url": "deno:core/00_primordials.js",
+  "functions": [
+    {
+      "functionName": "SafeIterator",
+      "ranges": [{ "startOffset": 9491, "endOffset": 9566, "count": 8 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "next",
+      "ranges": [{ "startOffset": 9573, "endOffset": 9626, "count": 16 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 9633, "endOffset": 9682, "count": 8 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

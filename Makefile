@@ -1,25 +1,15 @@
-BUILD_DIR=.build
+ROOT_DIR=$(shell pwd)
+BUILD_DIR=${ROOT_DIR}/.build
 
-run: clean dev-ndis run-dev
+run: clean mov jasm-test
 
-run-dev:
-	${BUILD_DIR}/runnable
+jasm-test:
+	deno test --coverage=.build/.cov --allow-read .
 
-dev:
-	deno run --unstable -A index.ts
-	chmod +x ${BUILD_DIR}/runnable
+nasm-test: mov
 
-dev-ndis: dev
-	ndisasm -b64 ${BUILD_DIR}/deno.bin
-
-dev-test:
-	deno test --coverage=.build/.cov .
-
-asm-flat: asm
-	ndisasm -b64 ${BUILD_DIR}/index.bin
-
-asm:
-	nasm -fbin index.s -o ${BUILD_DIR}/index.bin
+mov:
+	nasm -fbin ${ROOT_DIR}/assembly/$@.asm -o ${BUILD_DIR}/$@.bin
 
 clean:
 	rm -rf ${BUILD_DIR}
