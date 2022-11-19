@@ -1,0 +1,29 @@
+{
+  "scriptId": "191",
+  "url": "file:///home/zergal/Projects/vm/f-lang/jasm/mod.test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1391, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "splitBytes",
+      "ranges": [
+        { "startOffset": 297, "endOffset": 587, "count": 1 },
+        { "startOffset": 511, "endOffset": 586, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "fn",
+      "ranges": [{ "startOffset": 685, "endOffset": 1386, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "fn",
+      "ranges": [{ "startOffset": 1093, "endOffset": 1368, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "scriptId": "72",
+  "url": "deno:runtime/js/40_read_file.js",
+  "functions": [
+    {
+      "functionName": "readFile",
+      "ranges": [
+        { "startOffset": 351, "endOffset": 1021, "count": 1 },
+        { "startOffset": 448, "endOffset": 456, "count": 0 },
+        { "startOffset": 458, "endOffset": 652, "count": 0 },
+        { "startOffset": 839, "endOffset": 847, "count": 0 },
+        { "startOffset": 849, "endOffset": 1011, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "abortHandler",
+      "ranges": [{ "startOffset": 562, "endOffset": 592, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

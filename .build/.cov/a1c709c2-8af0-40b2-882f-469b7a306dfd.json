@@ -1,0 +1,39 @@
+{
+  "scriptId": "80",
+  "url": "deno:runtime/js/99_main.js",
+  "functions": [
+    {
+      "functionName": "formatException",
+      "ranges": [
+        { "startOffset": 7216, "endOffset": 7598, "count": 4 },
+        { "startOffset": 7308, "endOffset": 7594, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "promiseRejectCallback",
+      "ranges": [
+        { "startOffset": 21873, "endOffset": 22683, "count": 2 },
+        { "startOffset": 21955, "endOffset": 22180, "count": 1 },
+        { "startOffset": 22187, "endOffset": 22516, "count": 1 },
+        { "startOffset": 22523, "endOffset": 22553, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "promiseRejectMacrotaskCallback",
+      "ranges": [{ "startOffset": 22687, "endOffset": 24065, "count": 16 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "errorEventCb",
+      "ranges": [{ "startOffset": 23353, "endOffset": 23481, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 26276, "endOffset": 26330, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}
