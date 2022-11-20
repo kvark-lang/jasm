@@ -10,7 +10,8 @@ nasm-test: mov
 
 mov:
 	nasm -felf32 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
-	objcopy -O binary -j .text ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.test.bin
+	objcopy -O binary -j .firstTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.rr.bin
+	objcopy -O binary -j .secondTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.ri.bin
 
 clean:
 	rm -rf ${BUILD_DIR}
