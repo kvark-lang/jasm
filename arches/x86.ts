@@ -53,7 +53,26 @@ function makeRm(...bits: number[]) {
 	return parseInt(bits.join(""), 2);
 }
 
-// TODO check if these are all
+function splitInt(
+	number: number,
+) {
+	if (number < 0) {
+		number = number >>> 0;
+	}
+	const r = number.toString(16).padStart(8, "0");
+	const r1 = r.slice(0, 2);
+	const r2 = r.slice(2, 4);
+	const r3 = r.slice(4, 6);
+	const r4 = r.slice(6, 8);
+	return [
+		parseInt(r1, 16),
+		parseInt(r2, 16),
+		parseInt(r3, 16),
+		parseInt(r4, 16),
+	].reverse();
+}
+
+// TODO what if r<n> is there?
 const rmRegisters = {
 	"eax": [0, 0, 0],
 	"ecx": [0, 0, 1],
@@ -76,6 +95,7 @@ const rmMod = {
 function determineTypes(data: JasmIr) {
 	type TypeofTuple = `${TypeofTypeof}_${TypeofTypeof}`;
 	interface DstSrc {
+		needRm?: boolean;
 		dst?: { a: string; t: string };
 		src?: { a: string; t: string };
 	}
@@ -85,12 +105,14 @@ function determineTypes(data: JasmIr) {
 	const variants = {
 		"string_number": (_data: JasmIr) => {
 			return {
+				needRm: false,
 				dst: { a: "Z", t: "vqp" },
 				src: { a: "I", t: "vqp" },
 			};
 		},
 		"string_string": (_data: JasmIr) => {
 			return {
+				needRm: true,
 				dst: { a: "E", t: "vqp" },
 				src: { a: "G", t: "vqp" },
 			};
@@ -146,19 +168,38 @@ instructions.forEach((instruction) => {
 			// fetch first variant
 			// FIXME what if we have more or none?
 			const variant = variants[0];
-			// TODO rename rm0 - it is really just an instruction-specific REG value of r/m
-			if (variant.rm0) {
-				const rmREG = variant.rm0;
-				// FIXME implement rm0 for inc and dec and etc.
+			// rest-able parts of the instruction
+			const rmByte: number[] = [];
+			const operandDst: number[] = [];
+			const operandSrc: number[] = [];
+			const opcode: number[] = [variant.opcode];
+			if (types.needRm) {
+				// TODO rename rm0 - it is really just an instruction-specific REG value of r/m
+				if (variant.rm0) {
+					const rmREG = variant.rm0;
+					// FIXME implement rm0 for inc and dec and etc.
+				}
+				const rmBits = [];
+				rmBits.push(...rmMod["vqp"]);
+				// yes, in reverse
+				// dst, src
+				rmBits.push(...rmRegisters[arg2]);
+				rmBits.push(...rmRegisters[arg1]);
+				// byte constructed, push into self
+				rmByte.push(makeRm(...rmBits));
+			} else {
+				opcode[0] = makeRm(...rmRegisters[arg1]) +
+					opcode[0];
+				operandSrc.push(
+					...splitInt(arg2 as number),
+				);
 			}
-			const rmBits = [];
-			rmBits.push(...rmMod["vqp"]);
-			// yes, in reverse
-			// dst, src
-			rmBits.push(...rmRegisters[arg2]);
-			rmBits.push(...rmRegisters[arg1]);
-			const rmByte = makeRm(...rmBits);
-			return [variant.opcode, rmByte];
+			return [
+				...opcode,
+				...rmByte,
+				...operandDst,
+				...operandSrc,
+			];
 		};
 	}
 });
