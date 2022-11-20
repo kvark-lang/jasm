@@ -1,25 +1,25 @@
-export type BinaryFormat = "elf" | "pe";
-export type BinaryCalculable = (binary: Array<number>) => Array<number>;
-export type BinaryPart = string | number[] | BinaryCalculable;
-export type BinaryWithAddressGaps = Array<BinaryPart>;
-export type InstructionData = (string | number)[];
-export type Instruction = (...data: InstructionData) => BinaryPart;
-
 import { x86 } from "./arches/x86.ts";
-
-export interface FactoryOptions {
-  arch: "x86";
-  withFormat: BinaryFormat;
-}
-
-export type BinaryFactory = Record<
-  string,
-  Instruction
->;
+import {
+	JasmFactory,
+	JasmFactoryOptions,
+	JasmInstruction,
+	JasmIr,
+	JasmOutputFormat,
+	JasmOutputWithAddressGaps,
+} from "./types.ts";
 
 export function factory(
-  options: FactoryOptions,
-): BinaryFactory {
-  const o = x86; // instructions defined here, can be destructured
-  return o;
+	_options: JasmFactoryOptions,
+): JasmFactory {
+	// TODO not just x86
+	return x86;
 }
+
+export type {
+	JasmFactory,
+	JasmFactoryOptions,
+	JasmInstruction,
+	JasmIr,
+	JasmOutputFormat,
+	JasmOutputWithAddressGaps,
+};

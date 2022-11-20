@@ -9,7 +9,8 @@ jasm-test:
 nasm-test: mov
 
 mov:
-	nasm -fbin ${ROOT_DIR}/assembly/$@.asm -o ${BUILD_DIR}/$@.bin
+	nasm -felf32 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
+	objcopy -O binary -j .text ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.test.bin
 
 clean:
 	rm -rf ${BUILD_DIR}
