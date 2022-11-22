@@ -1,5 +1,12 @@
-import { instructions } from "./x86.raw.ts";
+import { instructions, RawInstruction } from "./x86.raw.ts";
 import { JasmInstruction, JasmIr } from "../mod.ts";
+
+type TypeofTuple = `${TypeofTypeof}_${TypeofTypeof}`;
+interface DstSrc {
+	needRm?: boolean;
+	dst?: { a: string; t: string };
+	src?: { a: string; t: string };
+}
 
 type TypeofTypeof =
 	| "string"
@@ -53,6 +60,7 @@ function makeRm(...bits: number[]) {
 	return parseInt(bits.join(""), 2);
 }
 
+// TODO rewrite without using strings
 function splitInt(
 	number: number,
 ) {
@@ -93,17 +101,18 @@ const rmMod = {
 };
 
 function determineTypes(data: JasmIr) {
-	type TypeofTuple = `${TypeofTypeof}_${TypeofTypeof}`;
-	interface DstSrc {
-		needRm?: boolean;
-		dst?: { a: string; t: string };
-		src?: { a: string; t: string };
-	}
 	const [arg1, arg2] = data;
 	const types = [typeof arg1, typeof arg2];
 	const typesAsString = types.join("_") as TypeofTuple;
 	const variants = {
+		"string_undefined": (_data: JasmIr) => {
+			return {
+				needRm: true,
+				dst: { a: "E", t: "vqp" },
+			};
+		},
 		"string_number": (_data: JasmIr) => {
+			// TODO other string_string cases
 			return {
 				needRm: false,
 				dst: { a: "Z", t: "vqp" },
@@ -111,6 +120,7 @@ function determineTypes(data: JasmIr) {
 			};
 		},
 		"string_string": (_data: JasmIr) => {
+			// TODO other string_string cases
 			return {
 				needRm: true,
 				dst: { a: "E", t: "vqp" },
@@ -130,76 +140,96 @@ function determineTypes(data: JasmIr) {
 	return variant(data);
 }
 
+export function determineInstruction(
+	mnem: string,
+	instructionSet: Array<RawInstruction>,
+	types: DstSrc,
+) {
+	const variants = instructionSet.filter((i) => {
+		// assume correct, in case it does not exist
+		let correctDst = true;
+		// assume for src too
+		let correctSrc = true;
+		// if exists, check a (operand type) and t (data type?)
+		if (i.dst && types.dst) {
+			correctDst = i.dst.a === types.dst.a &&
+				i.dst.t === types.dst.t;
+		}
+		// same thing for src
+		if (i.src && types.src) {
+			correctSrc = i.src.a === types.src.a &&
+				i.src.t === types.src.t;
+		}
+		// check that both are correct
+		return correctDst && correctSrc;
+	});
+	return variants;
+}
+
 instructions.forEach((instruction) => {
 	const mnem = instruction.mnem.toLowerCase();
+	const instructionSet = instructions.filter((i) => {
+		// check instruction mnemonic match -> ADD==ADD, ADD=/=MOV
+		if (!(i.mnem.toLowerCase() === mnem)) {
+			return false;
+		}
+		return true;
+	});
 	// if instruction does not exist yet
 	if (!x86[mnem]) {
-		// TODO could be made more effective with pre-filtering of mnemonics
 		x86[mnem] = (...data: JasmIr) => {
 			const types = determineTypes(data);
 			const [arg1, arg2] = data;
-			const variants = instructions.filter((i) => {
-				// check instruction mnemonic match -> ADD==ADD, ADD=/=MOV
-				if (!(i.mnem.toLowerCase() === mnem)) {
-					return false;
-				}
-				// assume correct, in case it does not exist
-				let correctDst = true;
-				// assume for src too
-				let correctSrc = true;
-				// if exists, check a (operand type) and t (data type?)
-				if (i.dst && types.dst) {
-					correctDst = i.dst.a === types.dst.a &&
-						i.dst.t === types.dst.t;
-				}
-				// same thing for src
-				if (i.src && types.src) {
-					correctSrc = i.src.a === types.src.a &&
-						i.src.t === types.src.t;
-				}
-				// check that both are correct
-				return correctDst && correctSrc;
-			});
-			if (!variants) {
+			// fetch first variant
+			// FIXME what if we have more or none?
+			const variants = determineInstruction(
+				mnem,
+				instructionSet,
+				types,
+			);
+			if (!variants.length) {
 				throw `no correct combination of types found for - ${mnem} ${
 					data.join(" ")
 				}`;
 			}
-			// fetch first variant
-			// FIXME what if we have more or none?
 			const variant = variants[0];
-			// rest-able parts of the instruction
-			const rmByte: number[] = [];
-			const operandDst: number[] = [];
-			const operandSrc: number[] = [];
-			const opcode: number[] = [variant.opcode];
+
+			const result = [];
+
 			if (types.needRm) {
+				result.push(variant.opcode);
+				const rmBits = [];
+				// FIXME not always vqp
+				rmBits.push(...rmMod["vqp"]);
 				// TODO rename rm0 - it is really just an instruction-specific REG value of r/m
 				if (variant.rm0) {
-					const rmREG = variant.rm0;
+					rmBits.push(
+						...variant.rm0.toString(2)
+							.padStart(3, "0").split("").map((v) =>
+								parseInt(v)
+							),
+					);
 					// FIXME implement rm0 for inc and dec and etc.
 				}
-				const rmBits = [];
-				rmBits.push(...rmMod["vqp"]);
 				// yes, in reverse
 				// dst, src
-				rmBits.push(...rmRegisters[arg2]);
+				if (variant.src) {
+					rmBits.push(...rmRegisters[arg2]);
+				}
 				rmBits.push(...rmRegisters[arg1]);
 				// byte constructed, push into self
-				rmByte.push(makeRm(...rmBits));
+				result.push(makeRm(...rmBits));
 			} else {
-				opcode[0] = makeRm(...rmRegisters[arg1]) +
-					opcode[0];
-				operandSrc.push(
+				result.push(
+					makeRm(...rmRegisters[arg1]) +
+						variant.opcode,
+				);
+				result.push(
 					...splitInt(arg2 as number),
 				);
 			}
-			return [
-				...opcode,
-				...rmByte,
-				...operandDst,
-				...operandSrc,
-			];
+
+			return result;
 		};
 	}
 });
