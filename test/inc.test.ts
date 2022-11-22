@@ -15,7 +15,7 @@ Deno.test({
 		});
 
 		// set up byte splitter to process consequent instructions
-		const bytes = splitBytes(testInc);
+		const bytes = splitBytes(testInc, 1);
 
 		await t.step({
 			name: "inc eax",
