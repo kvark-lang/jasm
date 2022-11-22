@@ -108,7 +108,7 @@ function determineTypes(data: JasmIr) {
 		"string_undefined": (_data: JasmIr) => {
 			return {
 				needRm: true,
-				dst: { a: "E", t: "vqp" },
+				dst: { a: "Z", t: "v" },
 			};
 		},
 		"string_number": (_data: JasmIr) => {
@@ -194,15 +194,15 @@ instructions.forEach((instruction) => {
 			}
 			const variant = variants[0];
 
-			const result = [];
+			let result = [];
 
 			if (types.needRm) {
-				result.push(variant.opcode);
 				const rmBits = [];
+				result.push(variant.opcode);
 				// FIXME not always vqp
 				rmBits.push(...rmMod["vqp"]);
 				// TODO rename rm0 - it is really just an instruction-specific REG value of r/m
-				if (variant.rm0) {
+				if (variant.rm0 !== undefined) {
 					rmBits.push(
 						...variant.rm0.toString(2)
 							.padStart(3, "0").split("").map((v) =>
@@ -218,7 +218,14 @@ instructions.forEach((instruction) => {
 				}
 				rmBits.push(...rmRegisters[arg1]);
 				// byte constructed, push into self
-				result.push(makeRm(...rmBits));
+				if (types?.dst?.a === "Z") {
+					// TODO figure out more elegant way to do inc and dec
+					result = [
+						variant.opcode + makeRm(...rmBits),
+					];
+				} else {
+					result.push(makeRm(...rmBits));
+				}
 			} else {
 				result.push(
 					makeRm(...rmRegisters[arg1]) +
