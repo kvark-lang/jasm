@@ -34,13 +34,6 @@ export const instructions = [
 		"definition": "i",
 	},
 	{
-		"mnem": "DEC",
-		"dst": { "a": "Z", "t": "v" },
-		"opcode": 48,
-		"modifier": "oszap",
-		"definition": "oszap",
-	},
-	{
 		"mnem": "PUSH",
 		"dst": { "a": "E", "t": "v" },
 		"opcode": 0xFF,
@@ -58,6 +51,20 @@ export const instructions = [
 	},
 	{
 		"mnem": "DEC",
+		"dst": { "a": "Z", "t": "v" },
+		"opcode": 48,
+		"modifier": "oszap",
+		"definition": "oszap",
+	},
+	{
+		"mnem": "INC",
+		"dst": { "a": "Z", "t": "v" },
+		"opcode": 40,
+		"modifier": "oszap",
+		"definition": "oszap",
+	},
+	{
+		"mnem": "DEC",
 		"dst": { "a": "E", "t": "b" },
 		"opcode": 0xFE,
 		"rm0": 1,
@@ -69,13 +76,6 @@ export const instructions = [
 		"dst": { "a": "E", "t": "vqp" },
 		"opcode": 0xFF,
 		"rm0": 1,
-		"modifier": "oszap",
-		"definition": "oszap",
-	},
-	{
-		"mnem": "INC",
-		"dst": { "a": "Z", "t": "v" },
-		"opcode": 40,
 		"modifier": "oszap",
 		"definition": "oszap",
 	},

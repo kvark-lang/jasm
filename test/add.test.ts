@@ -52,7 +52,7 @@ Deno.test({
 	fn: async (t) => {
 		const { add } = factory();
 
-		const bytes = splitBytes(testAddRI);
+		const bytes = splitBytes(testAddRI, 3);
 
 		await t.step({
 			name: "add eax, 1",

@@ -4,8 +4,14 @@ import { JasmInstruction, JasmIr } from "../mod.ts";
 type TypeofTuple = `${TypeofTypeof}_${TypeofTypeof}`;
 interface DstSrc {
 	needRm?: boolean;
-	dst?: { a: string[]; t: string[] };
-	src?: { a: string[]; t: string[] };
+	dst?: {
+		a: string[];
+		t: string[];
+	};
+	src?: {
+		a: string[];
+		t: string[];
+	};
 }
 
 type TypeofTypeof =
@@ -100,6 +106,10 @@ const rmMod = {
 	"b": [1, 1],
 };
 
+const typeNeedRm = {
+	"Z": false,
+} as Record<string, boolean>;
+
 function determineTypes(data: JasmIr) {
 	const [arg1, arg2] = data;
 	const types = [typeof arg1, typeof arg2];
@@ -113,8 +123,10 @@ function determineTypes(data: JasmIr) {
 		},
 		"string_number": (_data: JasmIr) => {
 			return {
-				needRm: false,
-				dst: { a: ["Z", "E"], t: ["vqp"] },
+				dst: {
+					a: ["Z", "E"],
+					t: ["vqp"],
+				},
 				src: { a: ["I"], t: ["vqp", "bs"] },
 			};
 		},
@@ -190,50 +202,55 @@ instructions.forEach((instruction) => {
 				}`;
 			}
 			const variant = variants[0];
+			console.log(variant);
 
-			let result = [];
-
-			if (types.needRm) {
+			if (!variant.src && variant.dst!.a == "Z") {
 				const rmBits = [];
-				result.push(variant.opcode);
-				// FIXME not always vqp
 				rmBits.push(...rmMod["vqp"]);
-				// TODO rename rm0 - it is really just an instruction-specific REG value of r/m
-				if (variant.rm0 !== undefined) {
-					rmBits.push(
-						...variant.rm0.toString(2)
-							.padStart(3, "0").split("").map((v) =>
-								parseInt(v)
-							),
-					);
-					// FIXME implement rm0 for inc and dec and etc.
-				}
-				// yes, in reverse
-				// dst, src
-				if (variant.src) {
-					rmBits.push(...rmRegisters[arg2]);
-				}
 				rmBits.push(...rmRegisters[arg1]);
-				// byte constructed, push into self
-				if (types?.dst?.a.includes("Z")) {
-					// TODO figure out more elegant way to do inc and dec
-					result = [
-						variant.opcode + makeRm(...rmBits),
-					];
-				} else {
-					result.push(makeRm(...rmBits));
-				}
-			} else {
-				result.push(
-					makeRm(...rmRegisters[arg1]) +
-						variant.opcode,
-				);
-				result.push(
-					...splitInt(arg2 as number),
-				);
+				return [
+					variant.opcode + makeRm(...rmBits),
+				];
 			}
 
-			return result;
+			if (
+				variant.dst && variant.dst &&
+				variant.dst.a == "Z" && variant.src!.a == "I"
+			) {
+				return [
+					makeRm(...rmRegisters[arg1]) +
+					variant.opcode,
+					...splitInt(arg2 as number),
+				];
+			}
+
+			if (
+				variant.src && variant.dst &&
+				variant.dst.a == "E" && variant.src.a == "I"
+			) {
+				const rmBits = [];
+				rmBits.push(...rmMod["vqp"]);
+				rmBits.push(0, 0, 0);
+				rmBits.push(...rmRegisters[arg1]);
+				return [
+					variant.opcode,
+					makeRm(...rmBits),
+					arg2 as number,
+				];
+			}
+
+			if (
+				variant.src && variant.dst &&
+				variant.dst.a == "E" && variant.src.a == "G"
+			) {
+				const rmBits = [];
+				rmBits.push(...rmMod["vqp"]);
+				rmBits.push(...rmRegisters[arg2]);
+				rmBits.push(...rmRegisters[arg1]);
+				return [variant.opcode, makeRm(...rmBits)];
+			}
+
+			return [];
 		};
 	}
 });
