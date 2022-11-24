@@ -4,8 +4,8 @@ import { JasmInstruction, JasmIr } from "../mod.ts";
 type TypeofTuple = `${TypeofTypeof}_${TypeofTypeof}`;
 interface DstSrc {
 	needRm?: boolean;
-	dst?: { a: string; t: string };
-	src?: { a: string; t: string };
+	dst?: { a: string[]; t: string[] };
+	src?: { a: string[]; t: string[] };
 }
 
 type TypeofTypeof =
@@ -108,23 +108,22 @@ function determineTypes(data: JasmIr) {
 		"string_undefined": (_data: JasmIr) => {
 			return {
 				needRm: true,
-				dst: { a: "Z", t: "v" },
+				dst: { a: ["Z"], t: ["v"] },
 			};
 		},
 		"string_number": (_data: JasmIr) => {
-			// TODO other string_string cases
 			return {
 				needRm: false,
-				dst: { a: "Z", t: "vqp" },
-				src: { a: "I", t: "vqp" },
+				dst: { a: ["Z", "E"], t: ["vqp"] },
+				src: { a: ["I"], t: ["vqp", "bs"] },
 			};
 		},
 		"string_string": (_data: JasmIr) => {
 			// TODO other string_string cases
 			return {
 				needRm: true,
-				dst: { a: "E", t: "vqp" },
-				src: { a: "G", t: "vqp" },
+				dst: { a: ["E"], t: ["vqp"] },
+				src: { a: ["G"], t: ["vqp"] },
 			};
 		},
 	} as Record<
@@ -151,13 +150,13 @@ export function determineInstruction(
 		let correctSrc = true;
 		// if exists, check a (operand type) and t (data type?)
 		if (i.dst && types.dst) {
-			correctDst = i.dst.a === types.dst.a &&
-				i.dst.t === types.dst.t;
+			correctDst = types.dst.a!.includes(i.dst.a) &&
+				types.dst.t!.includes(i.dst.t);
 		}
 		// same thing for src
 		if (i.src && types.src) {
-			correctSrc = i.src.a === types.src.a &&
-				i.src.t === types.src.t;
+			correctSrc = types.src.a!.includes(i.src.a) &&
+				types.src.t!.includes(i.src.t);
 		}
 		// check that both are correct
 		return correctDst && correctSrc;
@@ -216,7 +215,7 @@ instructions.forEach((instruction) => {
 				}
 				rmBits.push(...rmRegisters[arg1]);
 				// byte constructed, push into self
-				if (types?.dst?.a === "Z") {
+				if (types?.dst?.a.includes("Z")) {
 					// TODO figure out more elegant way to do inc and dec
 					result = [
 						variant.opcode + makeRm(...rmBits),

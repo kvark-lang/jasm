@@ -6,10 +6,15 @@ run: clean nasm-test jasm-test
 jasm-test:
 	deno test --coverage=.build/.cov --allow-read .
 
-nasm-test: mov inc
+nasm-test: mov inc add
 
 mov:
 	nasm -felf32 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
+	objcopy -O binary -j .firstTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.rr.bin
+	objcopy -O binary -j .secondTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.ri.bin
+
+add:
+	nasm -felf64 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
 	objcopy -O binary -j .firstTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.rr.bin
 	objcopy -O binary -j .secondTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.ri.bin
 

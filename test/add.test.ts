@@ -2,79 +2,71 @@ import { assertEquals } from "https://deno.land/std@0.154.0/testing/asserts.ts";
 import { factory } from "../mod.ts";
 import { splitBytes } from "../common.test.ts";
 
-const testMovRR = await Deno.readFile(".build/mov.rr.bin");
+const testAddRR = await Deno.readFile(".build/add.rr.bin");
 
 Deno.test({
 	// testing varying mov instructions, 32 bit
 	name: "test jasm - mov reg reg",
 	fn: async (t) => {
 		// create factory to emit linux binaries in 32 bit mode
-		const { mov } = factory();
+		const { add } = factory();
 
 		// set up byte splitter to process consequent instructions
-		const bytes = splitBytes(testMovRR);
+		const bytes = splitBytes(testAddRR);
 
 		// run first test as defined in mov.asm
 		await t.step({
-			name: "mov eax, eax",
+			name: "add eax, eax",
 			fn: () => {
 				// real bytes from nasm run
 				const realValue = [...bytes.next().value];
 				// assert that jasm emitted the same thing
-				assertEquals(mov("eax", "eax"), realValue);
+				assertEquals(add("eax", "eax"), realValue);
 			},
 		});
 
 		await t.step({
-			name: "mov eax, ebx",
+			name: "add eax, ebx",
 			fn: () => {
 				const realValue = [...bytes.next().value];
-				assertEquals(mov("eax", "ebx"), realValue);
+				assertEquals(add("eax", "ebx"), realValue);
 			},
 		});
 
 		await t.step({
-			name: "mov ecx, edx",
+			name: "add ecx, edx",
 			fn: () => {
 				const realValue = [...bytes.next().value];
-				assertEquals(mov("ecx", "edx"), realValue);
+				assertEquals(add("ecx", "edx"), realValue);
 			},
 		});
 	},
 });
 
-const testMovRI = await Deno.readFile(".build/mov.ri.bin");
+const testAddRI = await Deno.readFile(".build/add.ri.bin");
 
 // same as above, but different section of the asm file
 Deno.test({
 	// testing varying mov instructions, 32 bit
 	name: "test jasm - mov reg imm",
 	fn: async (t) => {
-		const { mov } = factory();
+		const { add } = factory();
 
-		const bytes = splitBytes(testMovRI, 5);
+		const bytes = splitBytes(testAddRI);
 
 		await t.step({
-			name: "mov ebx, 1",
+			name: "add eax, 1",
 			fn: () => {
 				const realValue = [...bytes.next().value];
-				assertEquals(mov("ebx", 1), realValue);
+				assertEquals(add("eax", 1), realValue);
 			},
 		});
 
 		await t.step({
-			name: "mov eax, -2",
+			name: "add ebx, 0",
 			fn: () => {
 				const realValue = [...bytes.next().value];
-				assertEquals(mov("eax", -2), realValue);
-			},
-		});
-
-		await t.step({
-			name: "mov ecx, 200",
-			fn: () => {
-				const realValue = [...bytes.next().value];
-				assertEquals(mov("ecx", 200), realValue);
+				assertEquals(add("ebx", 0), realValue);
 			},
 		});
 	},
