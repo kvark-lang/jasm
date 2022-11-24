@@ -3352,6 +3352,13 @@ export const instructions = [
 		"isTwoByte": true,
 	},
 	{
+		"mnem": "ADD",
+		"dst": { "a": "E", "t": "vqp" },
+		"src": { "a": "I", "t": "vds" },
+		"opcode": 129,
+		"rm0": 0,
+	},
+	{
 		"mnem": "PMADDWD",
 		"dst": { "a": "V", "t": "dq" },
 		"src": { "a": "W", "t": "dq" },

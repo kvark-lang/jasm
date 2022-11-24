@@ -199,6 +199,7 @@ instructions.forEach((instruction) => {
 			}
 
 			const variant = variants[0];
+			console.log(variant);
 
 			if (!variant.src && variant.dst!.a == "Z") {
 				const rmBits = [];
@@ -226,7 +227,12 @@ instructions.forEach((instruction) => {
 			) {
 				const rmBits = [];
 				rmBits.push(...rmMod["vqp"]);
-				rmBits.push(0, 0, 0);
+				// TODO what if no rm0
+				rmBits.push(
+					...Object.values(
+						rmRegisters,
+					)[variant.rm0 as number],
+				);
 				rmBits.push(...rmRegisters[arg1]);
 				return [
 					variant.opcode,
