@@ -106,10 +106,6 @@ const rmMod = {
 	"b": [1, 1],
 };
 
-const typeNeedRm = {
-	"Z": false,
-} as Record<string, boolean>;
-
 function determineTypes(data: JasmIr) {
 	const [arg1, arg2] = data;
 	const types = [typeof arg1, typeof arg2];
@@ -201,8 +197,8 @@ instructions.forEach((instruction) => {
 					data.join(" ")
 				}`;
 			}
+
 			const variant = variants[0];
-			console.log(variant);
 
 			if (!variant.src && variant.dst!.a == "Z") {
 				const rmBits = [];
@@ -250,7 +246,9 @@ instructions.forEach((instruction) => {
 				return [variant.opcode, makeRm(...rmBits)];
 			}
 
-			return [];
+			throw `no correct handler found for - ${mnem} ${
+				data.join(" ")
+			}`;
 		};
 	}
 });

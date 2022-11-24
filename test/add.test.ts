@@ -5,8 +5,7 @@ import { splitBytes } from "../common.test.ts";
 const testAddRR = await Deno.readFile(".build/add.rr.bin");
 
 Deno.test({
-	// testing varying mov instructions, 32 bit
-	name: "test jasm - mov reg reg",
+	name: "test jasm - add reg reg",
 	fn: async (t) => {
 		// create factory to emit linux binaries in 32 bit mode
 		const { add } = factory();
@@ -47,8 +46,7 @@ const testAddRI = await Deno.readFile(".build/add.ri.bin");
 
 // same as above, but different section of the asm file
 Deno.test({
-	// testing varying mov instructions, 32 bit
-	name: "test jasm - mov reg imm",
+	name: "test jasm - add reg imm",
 	fn: async (t) => {
 		const { add } = factory();
 
@@ -67,6 +65,28 @@ Deno.test({
 			fn: () => {
 				const realValue = [...bytes.next().value];
 				assertEquals(add("ebx", 0), realValue);
+			},
+		});
+	},
+});
+
+const testBigAddRI = await Deno.readFile(
+	".build/add.bri.bin",
+);
+
+// same as above, but different section of the asm file
+Deno.test({
+	name: "test jasm - add reg big-imm",
+	fn: async (t) => {
+		const { add } = factory();
+
+		const bytes = splitBytes(testBigAddRI, 6);
+
+		await t.step({
+			name: "add ebx, 1000",
+			fn: () => {
+				const realValue = [...bytes.next().value];
+				assertEquals(add("ebx", 1000), realValue);
 			},
 		});
 	},

@@ -17,6 +17,7 @@ add:
 	nasm -felf64 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
 	objcopy -O binary -j .firstTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.rr.bin
 	objcopy -O binary -j .secondTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.ri.bin
+	objcopy -O binary -j .thirdTest ${BUILD_DIR}/$@.bin ${BUILD_DIR}/$@.bri.bin
 
 inc:
 	nasm -felf32 ${ROOT_DIR}/test/$@.asm -o ${BUILD_DIR}/$@.bin
