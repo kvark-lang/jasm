@@ -1,2 +1,5 @@
 # Build artificats
 .build
+# Nix-specific
+shell.nix
+.envrc
