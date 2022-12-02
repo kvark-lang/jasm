@@ -118,12 +118,15 @@ function determineTypes(data: JasmIr) {
 			};
 		},
 		"string_number": (_data: JasmIr) => {
+			const srcT = ["vqp", "bs"]
+			if(_data[1] >= 256)
+				srcT.unshift("vds")
 			return {
 				dst: {
 					a: ["Z", "E"],
 					t: ["vqp"],
 				},
-				src: { a: ["I"], t: ["vqp", "bs"] },
+				src: { a: ["I"], t: srcT },
 			};
 		},
 		"string_string": (_data: JasmIr) => {
@@ -198,7 +201,7 @@ instructions.forEach((instruction) => {
 				}`;
 			}
 
-			const variant = variants[0];
+			const variant = variants.reverse()[0];
 			console.log(variant);
 
 			if (!variant.src && variant.dst!.a == "Z") {
@@ -225,6 +228,7 @@ instructions.forEach((instruction) => {
 				variant.src && variant.dst &&
 				variant.dst.a == "E" && variant.src.a == "I"
 			) {
+				console.log(types)
 				const rmBits = [];
 				rmBits.push(...rmMod["vqp"]);
 				// TODO what if no rm0
@@ -234,10 +238,14 @@ instructions.forEach((instruction) => {
 					)[variant.rm0 as number],
 				);
 				rmBits.push(...rmRegisters[arg1]);
+				// TODO refactor processedArg2
+				let processedArg2 = [arg2 as number]
+				if(variant.src.t == "vds")
+					processedArg2 = splitInt(processedArg2[0])
 				return [
 					variant.opcode,
 					makeRm(...rmBits),
-					arg2 as number,
+					...processedArg2,
 				];
 			}
 
